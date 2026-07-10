@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Testing Salesforce callouts beyond the happy path — Ambika Mishra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&family=Caveat:wght@600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{--paper:#FAF8F3;--dot:#D8D2C4;--ink:#1F2933;--ink-soft:#5B6470;--pen:#1B4FD8;--margin:#E86A5E;--hl:#FFE977;--card:#FFFFFF;--line:#E4DFD3}
+html[data-theme="dark"]{--paper:#16181D;--dot:#2A2E36;--ink:#E8E6E0;--ink-soft:#9AA1AC;--pen:#6D9BFF;--margin:#C05B51;--hl:rgba(255,233,119,.22);--card:#1D2026;--line:#2C3038}
+*{box-sizing:border-box;margin:0}
+body{font-family:'Public Sans',sans-serif;color:var(--ink);line-height:1.75;font-size:17px;background:var(--paper);background-image:radial-gradient(var(--dot) 1px,transparent 1px);background-size:22px 22px}
+.page{max-width:680px;margin:0 auto;padding:56px 28px 90px;position:relative}
+.page::before{content:"";position:absolute;top:0;bottom:0;left:8px;width:2px;background:var(--margin);opacity:.55}
+h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:clamp(1.6rem,4.5vw,2.3rem);line-height:1.2;margin:8px 0 6px}
+h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:1.2rem;margin:44px 0 12px}
+p{margin:0 0 18px}
+mark{background:linear-gradient(transparent 45%,var(--hl) 45%);color:inherit;padding:0 2px}
+a{color:var(--pen);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:var(--pen)}
+.kicker{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--pen)}
+.meta{color:var(--ink-soft);font-size:.9rem;margin-bottom:34px}
+.note{font-family:'Caveat',cursive;font-size:1.3rem;color:var(--margin);transform:rotate(-1.5deg);display:inline-block;margin:4px 0 18px}
+ol,ul{padding-left:22px;margin:0 0 18px}
+li{margin-bottom:8px}
+code{font-family:'JetBrains Mono',monospace;font-size:.85em;background:var(--card);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+pre{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow-x:auto;margin:0 0 20px;line-height:1.55}
+pre code{border:none;background:none;padding:0;font-size:.82rem}
+</style>
+</head>
+<body>
+<div class="page">
+<p><a href="index.html">← back to notes</a></p>
+<span class="kicker">Notes from the org · Integration</span>
+<h1>Testing Salesforce callouts beyond the happy path</h1>
+<p class="meta">Ambika Mishra · 2026 · 6 min read</p>
+
+<p>Most callout test suites I have reviewed share the same shape: one mock, one 200 response, one assertion that the data parsed. The suite is green, coverage looks healthy, and the first time the external system returns a 500 at two in the morning, nobody knows what the code actually does, because nobody ever asked it.</p>
+
+<p>Integrations fail. The vendor API times out, the middleware layer has a deployment window, the other Salesforce org in a multi-org sync throws a limit error. Whether the far side is MuleSoft, a fulfillment vendor, or another org, the shape of the problem is identical, and so is the discipline: <mark>the failure paths deserve tests before the happy path does</mark>, because the happy path is the one you will notice breaking anyway.</p>
+
+<h2>Why Salesforce forces mocking, and why that is a gift</h2>
+
+<p>Apex tests are not allowed to make real callouts. The platform blocks them so tests stay deterministic and never depend on someone else's uptime. The escape hatch is <code>HttpCalloutMock</code>: you hand the test a fake HTTP layer, and your class runs against responses you control completely.</p>
+
+<p>That constraint is the gift. Since you must fabricate the response anyway, fabricating a 500 costs exactly as much as fabricating a 200. There is no excuse left for testing only sunshine.</p>
+
+<h2>The service under test</h2>
+
+<p>The example is from my CaseDesk project: an order-status service calling an external fulfillment API through a Named Credential. The part that matters is the status-code branching:</p>
+
+<pre><code>public with sharing class OrderStatusService {
+
+    public static String getStatus(String orderNumber) {
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint('callout:Fulfillment_API/orders/' + orderNumber);
+        req.setMethod('GET');
+        req.setTimeout(10000);
+
+        HttpResponse res = new Http().send(req);
+
+        if (res.getStatusCode() == 200) {
+            OrderResponse parsed = (OrderResponse)
+                JSON.deserialize(res.getBody(), OrderResponse.class);
+            return parsed.status;
+        } else if (res.getStatusCode() >= 500) {
+            IntegrationLogger.log(req, res);   // transient: log, retry later
+            return 'UNAVAILABLE';
+        } else {
+            IntegrationLogger.log(req, res);   // 4xx: our request is wrong
+            return 'INVALID_ORDER';            // retrying will not help
+        }
+    }
+}</code></pre>
+
+<p>The 4xx versus 5xx split is the heart of the design. A 5xx means the other side is having a bad day, so the caller may retry with backoff. A 4xx means the request itself is wrong, and retrying a wrong request just generates load and noise. Code that treats every non-200 the same way has not made a decision; it has avoided one.</p>
+
+<p class="note">one mock per behavior, not one mock per suite</p>
+
+<h2>The mocks: one per behavior</h2>
+
+<pre><code>@isTest
+global class FulfillmentMock200 implements HttpCalloutMock {
+    global HttpResponse respond(HttpRequest req) {
+        HttpResponse res = new HttpResponse();
+        res.setStatusCode(200);
+        res.setBody('{"status":"SHIPPED","eta":"2026-07-12"}');
+        return res;
+    }
+}
+
+@isTest
+global class FulfillmentMock500 implements HttpCalloutMock {
+    global HttpResponse respond(HttpRequest req) {
+        HttpResponse res = new HttpResponse();
+        res.setStatusCode(500);
+        res.setBody('{"error":"internal"}');
+        return res;
+    }
+}</code></pre>
+
+<p>And the tests that use them:</p>
+
+<pre><code>@isTest
+static void statusParsesOnSuccess() {
+    Test.setMock(HttpCalloutMock.class, new FulfillmentMock200());
+    Test.startTest();
+    String result = OrderStatusService.getStatus('4521');
+    Test.stopTest();
+    System.assertEquals('SHIPPED', result);
+}
+
+@isTest
+static void serverErrorDegradesGracefully() {
+    Test.setMock(HttpCalloutMock.class, new FulfillmentMock500());
+    Test.startTest();
+    String result = OrderStatusService.getStatus('4521');
+    Test.stopTest();
+    System.assertEquals('UNAVAILABLE', result,
+        'A 5xx must degrade, never throw to the user');
+    // and assert the log record exists: failures must leave evidence
+}</code></pre>
+
+<p>Notice what the second test protects. Not data. Behavior under stress: the user's experience when the far side is down, and the audit trail that lets someone debug it tomorrow morning. Those are the two things production actually asks of an integration.</p>
+
+<h2>The checklist I hold callout code to</h2>
+
+<ol>
+<li>A mock for 200, a mock for 5xx, and a mock for the ugliest realistic 4xx. Three behaviors, three mocks.</li>
+<li>Every test asserts an outcome. Coverage without assertions is a rounding error wearing a green checkmark.</li>
+<li>An explicit timeout on every request. The default is not a decision.</li>
+<li>Failures write a log record with a correlation Id, so one request can be traced across both systems. The test asserts the log exists.</li>
+<li>If the callout is async, the enqueue sits inside <code>Test.startTest</code> and <code>stopTest</code>, which forces the queued work to run so the assertions see real results.</li>
+<li>Malformed-body test: a 200 with garbage JSON. External systems break contracts more often than they return errors.</li>
+</ol>
+
+<h2>The opinion part</h2>
+
+<p>Teams sometimes treat failure-path tests as polish to add later. I think that ordering is backwards. The happy path announces its own failures loudly, in front of users. The failure paths fail silently, in log files nobody reads, at hours nobody is watching. Test coverage should be distributed by where silence is most dangerous, and by that measure the 500 deserves your first mock, not your last.</p>
+
+<p class="meta" style="margin-top:44px">Patterns built and verified in my CaseDesk project org. If you handle this differently, tell me on <a href="https://www.linkedin.com/in/ambika-mishra23">LinkedIn</a>, integration war stories are the best kind.</p>
+</div>
+<script>
+const saved=localStorage.getItem('theme');
+if(saved)document.documentElement.setAttribute('data-theme',saved);
+</script>
+</body>
+</html>
