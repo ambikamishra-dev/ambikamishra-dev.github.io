@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ambika Mishra — Salesforce Developer</title>
+<meta name="description" content="Salesforce Developer & Administrator. 6.5+ years. Apex, LWC, Flow, integrations. Certified PD1 & Admin." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&family=Caveat:wght@600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --paper:#FAF8F3; --dot:#D8D2C4; --ink:#1F2933; --ink-soft:#5B6470;
+  --pen:#1B4FD8; --margin:#E86A5E; --hl:#FFE977; --card:#FFFFFF; --line:#E4DFD3;
+}
+html[data-theme="dark"]{
+  --paper:#16181D; --dot:#2A2E36; --ink:#E8E6E0; --ink-soft:#9AA1AC;
+  --pen:#6D9BFF; --margin:#C05B51; --hl:rgba(255,233,119,.22); --card:#1D2026; --line:#2C3038;
+}
+*{box-sizing:border-box;margin:0}
+body{
+  font-family:'Public Sans',sans-serif;color:var(--ink);line-height:1.65;font-size:16.5px;
+  background:var(--paper);
+  background-image:radial-gradient(var(--dot) 1px, transparent 1px);
+  background-size:22px 22px;
+}
+.page{max-width:760px;margin:0 auto;padding:56px 28px 80px;position:relative}
+/* signature: notebook margin rule */
+.page::before{content:"";position:absolute;top:0;bottom:0;left:8px;width:2px;background:var(--margin);opacity:.55}
+@media(min-width:900px){.page::before{left:-34px}}
+.margin-note{font-family:'Caveat',cursive;font-size:1.25rem;color:var(--margin);position:absolute;left:-190px;width:150px;text-align:right;line-height:1.25;display:none;transform:rotate(-2deg)}
+@media(min-width:1160px){.margin-note{display:block}}
+h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:clamp(2rem,5vw,2.9rem);letter-spacing:-.01em}
+h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:1.35rem;margin:0 0 14px}
+section{margin-top:64px;position:relative}
+.kicker{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--pen);display:block;margin-bottom:6px}
+mark{background:linear-gradient(transparent 45%, var(--hl) 45%);color:inherit;padding:0 2px}
+a{color:var(--pen);text-decoration:none;border-bottom:1px solid transparent}
+a:hover,a:focus-visible{border-bottom-color:var(--pen)}
+a:focus-visible{outline:2px solid var(--pen);outline-offset:3px;border-radius:2px}
+/* header */
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.sub{color:var(--ink-soft);margin-top:10px;max-width:56ch}
+#themeBtn{background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-size:.85rem;cursor:pointer}
+#themeBtn:hover{border-color:var(--pen)}
+/* certs */
+.certs{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.cert{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 14px;font-size:.86rem;font-weight:500}
+.cert .dot-ok{width:8px;height:8px;border-radius:50%;background:var(--pen)}
+.cert small{color:var(--ink-soft);font-weight:400}
+/* links strip */
+.links{display:flex;flex-wrap:wrap;gap:18px;margin-top:20px;font-family:'JetBrains Mono',monospace;font-size:.82rem}
+/* cards / lists */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+.tagrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.tag{font-family:'JetBrains Mono',monospace;font-size:.7rem;border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--ink-soft)}
+.status{font-family:'Caveat',cursive;color:var(--margin);font-size:1.15rem}
+.writing{list-style:none;padding:0}
+.writing li{padding:14px 2px;border-bottom:1px dashed var(--line);display:flex;justify-content:space-between;gap:16px;align-items:baseline}
+.writing .t{max-width:46ch}
+.writing .s{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--ink-soft);white-space:nowrap}
+footer{margin-top:80px;color:var(--ink-soft);font-size:.85rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+@media (prefers-reduced-motion: no-preference){
+  .card{transition:transform .18s ease}
+  .card:hover{transform:translateY(-2px)}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="top">
+    <div>
+      <span class="kicker">Working notes of</span>
+      <h1>Ambika Mishra</h1>
+      <p class="sub"><mark>Salesforce Developer &amp; Administrator</mark> — 6.5+ years building on the platform: Apex, Lightning Web Components, Flows, and REST integrations, mostly on Sales Cloud and Service Cloud.</p>
+    </div>
+    <button id="themeBtn" aria-label="Toggle dark mode">☾ / ☀</button>
+  </header>
+
+  <div class="certs" aria-label="Certifications">
+    <span class="cert"><span class="dot-ok"></span>Salesforce Certified Platform Developer I <small>· 2026</small></span>
+    <span class="cert"><span class="dot-ok"></span>Salesforce Certified Administrator <small>· 2026</small></span>
+    <!-- next: Agentforce Specialist -->
+  </div>
+
+  <nav class="links" aria-label="Profiles">
+    <a href="https://github.com/ambikamishra-dev">github.com/ambikamishra-dev</a>
+    <a href="https://www.salesforce.com/trailblazer/ambikaforce23">trailblazer/ambikaforce23</a>
+    <a href="https://www.linkedin.com/in/ambika-mishra23">linkedin/ambika-mishra23</a>
+  </nav>
+
+  <section id="project">
+    <span class="margin-note">built end-to-end, not a tutorial →</span>
+    <span class="kicker">Current build</span>
+    <h2>CaseDesk — Service Cloud support hub</h2>
+    <div class="card">
+      <p>A customer-support platform for a fictional consumer-goods manufacturer, built layer by layer the way a real org grows: data model and record-level security, an escalation Flow, a one-trigger-per-object Apex framework, a resilient REST callout to an external fulfillment API, an LWC case cockpit, and an Agentforce agent that deflects cases before they exist.</p>
+      <p style="margin-top:10px"><span class="status">status: in progress — security &amp; automation layers shipped</span></p>
+      <div class="tagrow">
+        <span class="tag">Apex</span><span class="tag">Flow</span><span class="tag">LWC</span><span class="tag">Named Credentials</span><span class="tag">Sharing &amp; Security</span><span class="tag">Agentforce</span>
+      </div>
+      <p style="margin-top:14px"><a href="https://github.com/ambikamishra-dev/casedesk">Read the build →</a></p>
+    </div>
+  </section>
+
+  <section id="writing">
+    <span class="margin-note">real numbers, real error messages</span>
+    <span class="kicker">Writing</span>
+    <h2>Notes from the org</h2>
+    <ul class="writing">
+      <li><span class="t">One trigger per object: how a framework cut recurring defects ~40%</span><span class="s">drafting</span></li>
+      <li><span class="t">Testing Salesforce callouts beyond the happy path</span><span class="s">drafting</span></li>
+      <li><span class="t">Flow or Apex? What migrating 30+ automations taught me about the line</span><span class="s">planned</span></li>
+      <li><span class="t">Record access, explained the way I wish someone had explained it to me</span><span class="s">planned</span></li>
+      <li><span class="t">External ID + upsert: the pattern behind every clean data sync</span><span class="s">planned</span></li>
+      <li><span class="t">CaseDesk build diary: licenses, support processes, and other traps</span><span class="s">planned</span></li>
+    </ul>
+  </section>
+
+  <section id="about">
+    <span class="kicker">About</span>
+    <h2>Briefly</h2>
+    <p>I spent 6.5 years at Accenture building and supporting Salesforce for enterprise clients across manufacturing, utilities, and retail, then finished an M.S. in Computer Science in the US (May 2026). I like root causes more than workarounds, and I keep a notebook — this site is the public half of it.</p>
+  </section>
+
+  <footer>
+    <span>© 2026 Ambika Mishra</span>
+    <span>Macomb, IL · <a href="mailto:ambi.mishra23@gmail.com">ambi.mishra23@gmail.com</a></span>
+  </footer>
+</div>
+
+<script>
+const btn=document.getElementById('themeBtn');
+const saved=localStorage.getItem('theme');
+if(saved)document.documentElement.setAttribute('data-theme',saved);
+btn.addEventListener('click',()=>{
+  const cur=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',cur);
+  localStorage.setItem('theme',cur);
+});
+</script>
+</body>
+</html>
