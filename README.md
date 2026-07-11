@@ -1,4 +1,4 @@
-# CaseDesk — Service Cloud Support Hub
+# CaseDesk - Service Cloud Support Hub
 
 A customer-support platform for **Meridian Consumer Goods** (fictional manufacturer), built end-to-end the way a real org grows: record-level security, declarative automation, an Apex trigger framework, a resilient external integration, and an Agentforce agent that deflects cases before they exist.
 
@@ -11,13 +11,13 @@ Meridian's support team drowns in repetitive questions (returns, shipping, warra
 
 | Layer | What | Status |
 |---|---|---|
-| C1 · Data model & security | `Order__c` (lookup to Account), Case record types (Product Question / Order Issue), role hierarchy, Private OWD, owner-based sharing rule, permission set | ✅ shipped |
-| C2 · Escalation automation | Record-triggered Flow: Priority → High assigns Escalations queue + custom notification | ✅ shipped |
+| C1 · Data model & security | `Order__c` (lookup to Account), Case record types (Product Question / Order Issue), role hierarchy, Private OWD, owner-based sharing rule, permission set |  shipped |
+| C2 · Escalation automation | Record-triggered Flow: Priority → High assigns Escalations queue + custom notification |  shipped |
 | C3 · Trigger framework | One-trigger-per-object on Case, handler/service classes, recursion control, bypass permission | in progress |
 | C4 · SLA batch | Nightly Batch + Schedulable scanning cases open > 48h | planned |
 | C5 · LWC case cockpit | Account open-case history on the Case page via `@wire` | planned |
 | C6 · External integration | Named Credential → fulfillment API, 4xx/5xx branching, retry Queueable, `Integration_Log__c` | planned |
-| C7 · Agentforce agent | Service agent: Knowledge-grounded Q&A subagent ✅, case-creation Flow action + order-status Apex action | in progress |
+| C7 · Agentforce agent | Service agent: Knowledge-grounded Q&A subagent, case-creation Flow action + order-status Apex action | in progress |
 
 ## Design decisions (the part worth reading)
 
