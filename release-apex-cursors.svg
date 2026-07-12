@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" font-family="Helvetica,Arial,sans-serif">
+  <rect width="1000" height="520" fill="#FAF8F3"/>
+  <g fill="#D8D2C4"><circle cx="40" cy="40" r="2"/><circle cx="100" cy="40" r="2"/><circle cx="160" cy="40" r="2"/><circle cx="40" cy="100" r="2"/><circle cx="960" cy="480" r="2"/><circle cx="900" cy="480" r="2"/><circle cx="960" cy="420" r="2"/></g>
+
+  <text x="50" y="60" font-size="30" font-weight="bold" fill="#1F2933">Apex Cursors — GA in Spring '26</text>
+  <text x="50" y="90" font-size="16" fill="#5B6470">Work through huge SOQL result sets in chunks, from any position, across transactions.</text>
+
+  <!-- server-side query box -->
+  <rect x="50" y="130" width="260" height="150" rx="12" fill="#FFFFFF" stroke="#1F2933" stroke-width="2.5"/>
+  <text x="70" y="165" font-size="17" font-weight="bold" fill="#1B4FD8">SOQL result set</text>
+  <text x="70" y="192" font-size="14" fill="#1F2933">stored server-side as a cursor</text>
+  <text x="70" y="216" font-size="14" fill="#1F2933">up to 50,000,000 records</text>
+  <text x="70" y="240" font-size="14" fill="#5B6470">10,000 cursors / 24 hours</text>
+
+  <!-- fetch arrows -->
+  <path d="M 320 205 L 420 205" stroke="#1B4FD8" stroke-width="4" marker-end="url(#a)"/>
+  <text x="330" y="192" font-size="13" fill="#1B4FD8">fetch(position, size)</text>
+  <path d="M 420 235 L 320 235" stroke="#E86A5E" stroke-width="3" marker-end="url(#b)"/>
+  <text x="330" y="258" font-size="13" fill="#E86A5E">forwards or backwards</text>
+
+  <!-- chunk boxes -->
+  <g stroke="#1F2933" stroke-width="2" fill="#FFE977">
+    <rect x="440" y="150" width="70" height="44" rx="7"/>
+    <rect x="440" y="204" width="70" height="44" rx="7"/>
+    <rect x="440" y="258" width="70" height="44" rx="7" fill="#FFFFFF"/>
+  </g>
+  <text x="452" y="177" font-size="13" fill="#1F2933">chunk 1</text>
+  <text x="452" y="231" font-size="13" fill="#1F2933">chunk 2</text>
+  <text x="452" y="285" font-size="13" fill="#5B6470">chunk n</text>
+
+  <!-- two destinations -->
+  <path d="M 520 190 L 620 160" stroke="#1F2933" stroke-width="2.5" marker-end="url(#c)"/>
+  <path d="M 520 270 L 620 320" stroke="#1F2933" stroke-width="2.5" marker-end="url(#c)"/>
+
+  <rect x="630" y="115" width="320" height="105" rx="12" fill="#FFFFFF" stroke="#1B4FD8" stroke-width="2.5"/>
+  <text x="650" y="148" font-size="16" font-weight="bold" fill="#1B4FD8">Async processing</text>
+  <text x="650" y="174" font-size="14" fill="#1F2933">cursor serializes between Queueable</text>
+  <text x="650" y="196" font-size="14" fill="#1F2933">jobs — chain through millions of rows</text>
+
+  <rect x="630" y="280" width="320" height="105" rx="12" fill="#FFFFFF" stroke="#1B4FD8" stroke-width="2.5"/>
+  <text x="650" y="313" font-size="16" font-weight="bold" fill="#1B4FD8">UI pagination</text>
+  <text x="650" y="339" font-size="14" fill="#1F2933">PaginationCursor + @AuraEnabled:</text>
+  <text x="650" y="361" font-size="14" fill="#1F2933">server-side paging for LWC, no OFFSET</text>
+
+  <!-- caveat strip -->
+  <rect x="50" y="420" width="900" height="60" rx="10" fill="#FFFFFF" stroke="#E86A5E" stroke-width="2.5"/>
+  <text x="70" y="445" font-size="15" font-weight="bold" fill="#E86A5E">Limits still apply</text>
+  <text x="70" y="468" font-size="14" fill="#1F2933">Each fetch() counts against the SOQL query limit; rows count against row limits. Track with Limits.getApexCursorRows().</text>
+
+  <text x="700" y="508" font-size="13" fill="#5B6470">ambikamishra-dev.github.io · release watch</text>
+
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1B4FD8"/></marker>
+    <marker id="b" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#E86A5E"/></marker>
+    <marker id="c" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1F2933"/></marker>
+  </defs>
+</svg>
