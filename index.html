@@ -116,6 +116,16 @@ footer{margin-top:80px;color:var(--ink-soft);font-size:.85rem;display:flex;justi
     </ul>
   </section>
 
+  <section id="releases">
+    <span class="kicker">Release watch · Spring '26</span>
+    <h2>Keeping up with the platform</h2>
+    <div class="card">
+      <p><strong>Apex Cursors (GA).</strong> Per the Spring '26 release notes: SOQL result sets can be stored server-side as a cursor and fetched in chunks from any position, up to 50 million records. Cursors serialize between Queueable jobs for chained async processing, and the new PaginationCursor class enables server-side paging for custom UIs. Each fetch() still counts against the SOQL query limit.</p>
+      <figure style="margin:18px 0 6px"><img src="release-apex-cursors.svg" alt="Diagram of Apex Cursors: server-side SOQL result set fetched in chunks to Queueable jobs and LWC pagination" style="max-width:100%;border:1px solid var(--line);border-radius:12px;background:#FAF8F3"/></figure>
+      <p style="margin-top:10px;font-size:.9rem;color:var(--ink-soft)"><a href="https://developer.salesforce.com/blogs/2026/01/developers-guide-to-the-spring-26-release" target="_blank" rel="noopener">Official Spring '26 developer guide ↗</a></p>
+    </div>
+  </section>
+
   <section id="about">
     <span class="kicker">About</span>
     <h2>Briefly</h2>
