@@ -49,7 +49,7 @@ code{font-family:'JetBrains Mono',monospace;font-size:.85em;background:var(--car
 <p class="note">the external key belongs on the record, not in a spreadsheet formula</p>
 
 <h2>Why this is bigger than convenience</h2>
-<p>The deeper property is <mark>idempotency</mark>: run the same file twice and you get the same result, not duplicates. That single property is what makes a sync safe to retry, safe to schedule, and safe to hand to someone else. Insert-based loads fail this test by design; every rerun after a partial failure is a duplicate factory. Upsert on an external ID passes it by design, which is why it is the backbone of every recurring integration I have built, whether the source was an HR system, a fulfillment platform, or another Salesforce org.</p>
+<p>The deeper property is <mark>idempotency</mark>: run the same file twice and you get the same result, not duplicates. That single property is what makes a sync safe to retry, safe to schedule, and safe to hand to someone else. Insert-based loads fail this test by design; every rerun after a partial failure is a duplicate factory. Upsert on an external ID passes it by design, which is why it is the backbone of every recurring integration I have built, which is why it is the backbone of every recurring integration I have built, whether the source was middleware feeding enterprise data or another Salesforce org in a multi-org sync.</p>
 
 <h2>The checklist before any keyed load</h2>
 <ol>
