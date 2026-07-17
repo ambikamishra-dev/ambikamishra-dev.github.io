@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>@api down, events up, LMS sideways: how LWC components should talk — Ambika Mishra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&family=Caveat:wght@600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{--paper:#FAF8F3;--dot:#D8D2C4;--ink:#1F2933;--ink-soft:#5B6470;--pen:#1B4FD8;--margin:#E86A5E;--hl:#FFE977;--card:#FFFFFF;--line:#E4DFD3}
+html[data-theme="dark"]{--paper:#16181D;--dot:#2A2E36;--ink:#E8E6E0;--ink-soft:#9AA1AC;--pen:#6D9BFF;--margin:#C05B51;--hl:rgba(255,233,119,.22);--card:#1D2026;--line:#2C3038}
+*{box-sizing:border-box;margin:0}
+body{font-family:'Public Sans',sans-serif;color:var(--ink);line-height:1.75;font-size:17px;background:var(--paper);background-image:radial-gradient(var(--dot) 1px,transparent 1px);background-size:22px 22px}
+.page{max-width:680px;margin:0 auto;padding:56px 28px 90px;position:relative}
+.page::before{content:"";position:absolute;top:0;bottom:0;left:8px;width:2px;background:var(--margin);opacity:.55}
+h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:clamp(1.6rem,4.5vw,2.3rem);line-height:1.2;margin:8px 0 6px}
+h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:1.2rem;margin:44px 0 12px}
+p{margin:0 0 18px}
+mark{background:linear-gradient(transparent 45%,var(--hl) 45%);color:inherit;padding:0 2px}
+a{color:var(--pen);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:var(--pen)}
+.kicker{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--pen)}
+.meta{color:var(--ink-soft);font-size:.9rem;margin-bottom:34px}
+.note{font-family:'Caveat',cursive;font-size:1.3rem;color:var(--margin);transform:rotate(-1.5deg);display:inline-block;margin:4px 0 18px}
+ol,ul{padding-left:22px;margin:0 0 18px}
+li{margin-bottom:9px}
+code{font-family:'JetBrains Mono',monospace;font-size:.85em;background:var(--card);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.rule{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:0 0 18px;font-size:.96rem}
+.rule b{color:var(--pen)}
+pre{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow-x:auto;margin:0 0 20px;line-height:1.55}
+pre code{border:none;background:none;padding:0;font-size:.82rem}
+</style>
+</head>
+<body>
+<div class="page">
+<p><a href="index.html">← back to notes</a></p>
+<span class="kicker">Notes from the org · LWC</span>
+<h1>@api down, events up, LMS sideways: how LWC components should talk</h1>
+<p class="meta">Ambika Mishra · 2026 · 5 min read</p>
+
+<p>Most LWC bugs I have debugged were not JavaScript bugs. They were communication bugs: a child mutating its parent's data, an event that never bubbled where anyone expected, two unrelated components polling the server because neither knew the other existed. The framework has exactly three sanctioned channels, one per direction, and components stay maintainable precisely as long as everyone respects the directions.</p>
+
+<div class="rule"><b>Down: @api.</b> A parent passes data to a child through public properties, and calls behavior through public methods. The child exposes the interface; the parent drives it.</div>
+<div class="rule"><b>Up: events.</b> A child never reaches into its parent. It announces what happened with a CustomEvent and lets whoever is listening decide what to do about it.</div>
+<div class="rule"><b>Sideways: Lightning Message Service.</b> Components with no ancestor relationship, anywhere on the page, publish and subscribe over a message channel. It even crosses into Aura and Visualforce, which makes it the bridge during long migrations.</div>
+
+<h2>Down, and the trap inside it</h2>
+<p>The mechanics are one decorator: the child marks a property <code>@api recordId</code>, the parent binds it in markup. The trap is subtler: <mark>@api data is owned by the parent, and the child must treat it as read-only.</mark> Objects and arrays arrive by reference, and a child that mutates them has silently created shared state with its parent. When something needs to change, the child copies first or, better, asks upward through an event. One-way data flow is not a style preference; it is what makes a component tree debuggable, because every value has exactly one owner.</p>
+
+<h2>Up, and the naming that saves you later</h2>
+<pre><code>// child: announce, don't command
+this.dispatchEvent(new CustomEvent('caseselect', {
+    detail: { caseId: this.selectedId }
+}));</code></pre>
+<pre><code>&lt;!-- parent: listen and decide --&gt;
+&lt;c-case-list oncaseselect={handleCaseSelect}&gt;&lt;/c-case-list&gt;</code></pre>
+<p>Two habits carry the weight here. Name events after <mark>what happened, not what should happen next</mark>: caseselect, not opendetailpanel. The child reporting news stays reusable anywhere; the child issuing commands is welded to one parent's intentions. And keep detail payloads primitive where possible; shipping whole mutable objects upward reopens the shared-state door you just closed.</p>
+
+<h2>Sideways, and when it is actually justified</h2>
+<p>LMS is the channel people reach for too early. The test I apply: <mark>if the components share an ancestor you control, communicate through the ancestor.</mark> Parent-mediated communication keeps the data flow visible in one file. LMS earns its place when there is genuinely no shared ancestor: a utility bar component talking to a record page, two regions of an app page, or an LWC coordinating with legacy Aura during a migration. It is a page-wide broadcast, and broadcasts used casually become the global variables of the UI layer.</p>
+<p class="note">every value should have exactly one owner. every event should be news, not orders.</p>
+
+<h2>The review checklist</h2>
+<ol>
+<li>Does any child write to an @api property or mutate an @api object? That is the shared-state bug waiting for a bad day.</li>
+<li>Are events named as facts (selected, changed, submitted) rather than instructions?</li>
+<li>Could this LMS channel be a parent handler instead? If yes, it should be.</li>
+<li>Does anything sideways-communicate through the DOM, window objects, or pub-sub hacks predating LMS? Migrate it; the sanctioned channel exists now.</li>
+</ol>
+
+<h2>The opinion part</h2>
+<p>I think component communication is where LWC quietly enforces good architecture. The framework makes the right thing (one-way data, announced events) the easy thing, and the wrong thing (reaching across the tree) genuinely awkward. When a component tree feels painful, the pain is usually a message: some data has two owners, or some event is secretly a command. Fix the ownership and the tree fixes itself.</p>
+
+<p class="meta" style="margin-top:44px">More notes at the <a href="index.html">home page</a>. Different mental model? Tell me on <a href="https://www.linkedin.com/in/ambika-mishra23">LinkedIn</a>.</p>
+</div>
+<script>
+const saved=localStorage.getItem('theme');
+if(saved)document.documentElement.setAttribute('data-theme',saved);
+</script>
+</body>
+</html>
